@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — Douyin to YouTube Pipeline</title>
+<style>
+  body{max-width:760px;margin:60px auto;padding:0 22px;font:16px/1.75 -apple-system,"Segoe UI",system-ui,sans-serif;color:#24292f}
+  h1{font-size:28px;margin-bottom:4px}
+  .date{color:#656d76;font-size:14px;margin-bottom:32px}
+  h2{font-size:18px;margin-top:30px;padding-bottom:6px;border-bottom:1px solid #d8dee4}
+  code{background:#f6f8fa;padding:2px 6px;border-radius:4px;font-size:14px}
+  ul{padding-left:22px}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:15px}
+  th,td{border:1px solid #d8dee4;padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:#f6f8fa}
+  a{color:#0969da}
+</style>
+</head>
+<body>
+
+<h1>Privacy Policy</h1>
+<div class="date">Last updated: November 1, 2026</div>
+
+<p>
+  This Privacy Policy describes how the <strong>Douyin to YouTube Pipeline</strong>
+  ("the App", "we", "us") handles information. The App is a personal, single-user
+  automation tool operated by an individual developer.
+</p>
+
+<h2>1. What the App is</h2>
+<p>
+  The App is a private tool used by its owner to transfer short-form videos the owner
+  has the right to use from Douyin to the owner's own YouTube channel. It is not a
+  public service and has no end users other than its owner.
+</p>
+
+<h2>2. Google user data we access</h2>
+<p>
+  The App uses Google OAuth 2.0 and requests exactly one scope:
+</p>
+<table>
+  <tr><th>Scope</th><th>Why it is needed</th></tr>
+  <tr>
+    <td><code>https://www.googleapis.com/auth/youtube.upload</code></td>
+    <td>To upload video files to the owner's own YouTube channel via the YouTube Data API v3.</td>
+  </tr>
+</table>
+
+<p>
+  The App <strong>does not</strong> request or access:
+</p>
+<ul>
+  <li>Gmail, Google Drive, Google Calendar, or Google Contacts</li>
+  <li>YouTube watch history, subscriptions, playlists, or private analytics</li>
+  <li>Any other Google account data</li>
+</ul>
+
+<h2>3. How we use Google user data</h2>
+<p>
+  Google user data (the OAuth token and the ability to upload to the owner's channel)
+  is used <strong>solely</strong> to perform the upload operation the owner explicitly initiates.
+  We do not use Google user data for advertising, profiling, analytics, or any secondary purpose.
+</p>
+
+<h2>4. Storage and retention</h2>
+<ul>
+  <li>
+    <strong>OAuth refresh token:</strong> stored locally in a file on the owner's own
+    server, protected by filesystem permissions. Never transmitted to any third party.
+  </li>
+  <li>
+    <strong>Video files:</strong> downloaded to a temporary directory on the owner's server,
+    then <strong>deleted immediately after the upload completes</strong>, whether the upload
+    succeeded or failed.
+  </li>
+  <li>
+    <strong>Video metadata</strong> (title, duration, quality tiers) is held in memory only
+    for the duration of a single job and is not persisted.
+  </li>
+</ul>
+
+<h2>5. Sharing and disclosure</h2>
+<p>
+  We do not sell, rent, trade, or otherwise share Google user data with any third party.
+  No data is shared with advertisers, data brokers, or analytics providers.
+</p>
+<p>
+  The App does send video identifiers to <a href="https://tikhub.io" rel="noopener">TikHub</a>,
+  a third-party API service, solely to resolve a public Douyin video link into a downloadable
+  file URL. No Google user data is ever sent to TikHub.
+</p>
+
+<h2>6. Data deletion</h2>
+<p>
+  The owner can revoke the App's access at any time at
+  <a href="https://myaccount.google.com/permissions" rel="noopener">
+  https://myaccount.google.com/permissions</a>.
+  Revoking access invalidates the stored OAuth token immediately.
+</p>
+<p>
+  To request deletion of any data associated with this App, contact the address below.
+  Because the App stores no server-side user database, deletion consists of removing the
+  local token file and any temporary video files — which the App already does automatically.
+</p>
+
+<h2>7. Security</h2>
+<p>
+  The App runs on a private server owned by the operator. Credentials are stored in
+  files readable only by the operator's OS user account. All network communication with
+  Google APIs uses HTTPS.
+</p>
+
+<h2>8. Children's privacy</h2>
+<p>
+  The App is not directed to children under 13 and does not knowingly collect any
+  information from children.
+</p>
+
+<h2>9. Changes to this policy</h2>
+<p>
+  Any changes will be posted on this page with an updated "Last updated" date.
+</p>
+
+<h2>10. Contact</h2>
+<p>
+  Questions about this Privacy Policy: <strong>kkme8023@gmail.com</strong>
+</p>
+
+<p style="margin-top:40px"><a href="index.html">← Back to home</a></p>
+
+</body>
+</html>
