@@ -66,7 +66,11 @@
     [h, q].filter(Boolean).forEach(function (chunk) {
       chunk.split('&').forEach(function (kv) {
         var i = kv.indexOf('=');
-        if (i > 0) params[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1));
+        if (i > 0) {
+          // urlencode 把空格编成 +，decodeURIComponent 不认，先还原
+          var v = kv.slice(i + 1).replace(/\+/g, ' ');
+          params[kv.slice(0, i)] = decodeURIComponent(v);
+        }
       });
     });
     return params;
@@ -103,7 +107,7 @@
     SRC = params.src;
     NAME = params.n || 'douyin.mp4';
     TOTAL = parseInt(params.s || '0', 10);
-    elTitle.textContent = params.t ? decodeURIComponent(params.t) : '抖音视频';
+    elTitle.textContent = params.t ? params.t : '抖音视频';
     var p2 = [];
     if (params.q) p2.push(params.q);
     if (TOTAL) p2.push(fmt(TOTAL));
