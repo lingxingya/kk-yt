@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>抖音视频下载</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;padding:20px;font:16px/1.65 -apple-system,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:#0f1115;color:#e6e8ec;max-width:560px;margin:0 auto}
+  .card{background:#171a21;border:1px solid #252a35;border-radius:14px;padding:20px;margin-bottom:14px}
+  .title{font-size:15px;color:#c3cad8;margin-bottom:12px;word-break:break-all;line-height:1.5}
+  .meta{margin-bottom:18px}
+  .pill{display:inline-block;background:#252a35;border-radius:6px;padding:3px 10px;font-size:12px;color:#9aa4b8;margin:0 6px 6px 0}
+  a.btn,button.btn{display:block;width:100%;text-align:center;background:#4c8dff;color:#fff;text-decoration:none;border:0;border-radius:11px;padding:17px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit}
+  a.btn:active,button.btn:active{background:#3a7ae8}
+  .hint{color:#8b94a7;font-size:13px;margin-top:14px;line-height:1.7}
+  .ok{color:#3ddc84}.err{color:#ff5c5c}
+  .bar{height:7px;background:#252a35;border-radius:4px;overflow:hidden;margin-top:16px}
+  .bar>i{display:block;height:100%;width:0;background:#4c8dff;transition:width .25s}
+  .hide{display:none}
+  h1{font-size:18px;margin:6px 0 16px;color:#e6e8ec}
+</style>
+</head>
+<body>
+
+<h1>抖音视频下载</h1>
+
+<div class="card">
+  <div class="title" id="title">准备中…</div>
+  <div class="meta" id="meta"></div>
+  <button class="btn" id="dl">⬇️ 开始下载</button>
+  <div class="hint" id="tip">正在解析…</div>
+  <div class="bar hide" id="bar"><i id="fill"></i></div>
+</div>
+
+<div class="card">
+  <div class="hint">
+    本页直接连接抖音 CDN 下载，不经过任何中转服务器。<br>
+    下载完成后文件存到浏览器下载目录。
+  </div>
+</div>
+
+<script>
+(function () {
+  var API = 'https://35-212-204-15.sslip.io/api/cdn';
+  var TOKEN = '';
+
+  var elTitle = document.getElementById('title');
+  var elMeta  = document.getElementById('meta');
+  var elTip   = document.getElementById('tip');
+  var elBar   = document.getElementById('bar');
+  var elFill  = document.getElementById('fill');
+  var btn     = document.getElementById('dl');
+
+  var SRC = null, NAME = null, TOTAL = 0, busy = false, started = false;
+
+  // 支持三种入参：
+  //   #src=<CDN直链>&n=<文件名>&s=<字节数>    服务器已解析好
+  //   #u=<抖音链接>&t=<口令>                   页面自己调 API 解析
+  //   ?u=<抖音链接>                            同上
+  function parseHash() {
+    var h = (location.hash || '').replace(/^#/, '');
+    var q = (location.search || '').replace(/^\?/, '');
+    var params = {};
+    [h, q].filter(Boolean).forEach(function (chunk) {
+      chunk.split('&').forEach(function (kv) {
+        var i = kv.indexOf('=');
+        if (i > 0) params[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1));
+      });
+    });
+    return params;
+  }
+
+  function fmt(n) {
+    if (!n) return '?';
+    if (n >= 1048576) return (n / 1048576).toFixed(1) + ' MB';
+    if (n >= 1024) return (n / 1024).toFixed(0) + ' KB';
+    return n + ' B';
+  }
+
+  function setInfo(d) {
+    elTitle.textContent = d.title || '抖音视频';
+    var pills = [];
+    if (d.quality) pills.push(d.quality);
+    if (d.width && d.height) pills.push(d.width + '×' + d.height);
+    if (d.size_mb) pills.push(d.size_mb + 'MB');
+    elMeta.innerHTML = pills.map(function (p) {
+      return '<span class="pill">' + p + '</span>';
+    }).join('');
+    SRC = d.cdn;
+    NAME = d.filename || 'douyin.mp4';
+    TOTAL = d.size_bytes || 0;
+    elTip.textContent = '点击上方按钮开始下载';
+    btn.disabled = false;
+    if (params.auto !== '0') setTimeout(start, 300);
+  }
+
+  var params = parseHash();
+
+  // 已带 CDN 直链
+  if (params.src) {
+    SRC = params.src;
+    NAME = params.n || 'douyin.mp4';
+    TOTAL = parseInt(params.s || '0', 10);
+    elTitle.textContent = params.t ? decodeURIComponent(params.t) : '抖音视频';
+    var p2 = [];
+    if (params.q) p2.push(params.q);
+    if (TOTAL) p2.push(fmt(TOTAL));
+    elMeta.innerHTML = p2.map(function (x) { return '<span class="pill">' + x + '</span>'; }).join('');
+    elTip.textContent = '点击上方按钮开始下载';
+    btn.disabled = false;
+    if (params.auto !== '0') setTimeout(start, 300);
+  }
+  // 需要向服务器解析
+  else if (params.u) {
+    elTip.textContent = '正在解析抖音链接…';
+    btn.disabled = true;
+    var apiUrl = API + '?u=' + encodeURIComponent(params.u) + (params.t ? '&t=' + encodeURIComponent(params.t) : '');
+    fetch(apiUrl, {mode: 'cors', credentials: 'omit'})
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d || !d.ok) throw new Error((d && (d.detail || d.error)) || '解析失败');
+        setInfo(d);
+      })
+      .catch(function (e) {
+        elTip.innerHTML = '<span class="err">解析失败：' + e.message + '</span>';
+      });
+  }
+  else {
+    elTip.innerHTML = '<span class="err">链接缺少参数，请重新从微信里获取</span>';
+  }
+
+  function save(blob) {
+    var u = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = u;
+    a.download = NAME;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(u); }, 20000);
+    elFill.style.width = '100%';
+    elTip.innerHTML = '<span class="ok">✅ 下载完成</span>（' + fmt(blob.size) + '），已保存到下载目录';
+  }
+
+  async function start() {
+    if (busy || !SRC) return;
+    busy = true;
+    started = true;
+    btn.disabled = true;
+    elBar.classList.remove('hide');
+    elTip.textContent = '正在连接抖音 CDN…';
+    try {
+      var resp = await fetch(SRC, {mode: 'cors', credentials: 'omit', cache: 'no-store'});
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      var total = parseInt(resp.headers.get('Content-Length') || '', 10) || TOTAL || 0;
+      if (resp.body && resp.body.getReader) {
+        var reader = resp.body.getReader();
+        var chunks = [], got = 0;
+        while (true) {
+          var r = await reader.read();
+          if (r.done) break;
+          chunks.push(r.value);
+          got += r.value.length;
+          if (total) {
+            var p = Math.min(100, got / total * 100);
+            elFill.style.width = p.toFixed(1) + '%';
+            elTip.textContent = '下载中 ' + p.toFixed(0) + '%（' + fmt(got) + ' / ' + fmt(total) + '）';
+          } else {
+            elTip.textContent = '下载中 ' + fmt(got);
+          }
+        }
+        save(new Blob(chunks, {type: 'video/mp4'}));
+      } else {
+        save(await resp.blob());
+      }
+    } catch (e) {
+      elBar.classList.add('hide');
+      btn.disabled = false;
+      busy = false;
+      elTip.innerHTML = '<span class="err">自动下载失败（' + e.message + '）</span><br>请点按钮重试，或长按链接另存';
+    }
+  }
+
+  btn.addEventListener('click', function (ev) { ev.preventDefault(); start(); });
+})();
+</script>
+</body>
+</html>
